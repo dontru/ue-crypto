@@ -1,7 +1,5 @@
 import unittest
 
-from cryptography.exceptions import InvalidSignature
-
 from crypto.Asymmetric import Asymmetric
 
 
@@ -33,18 +31,14 @@ class AsymmetricTest(unittest.TestCase):
         private_key, public_key = Asymmetric.generate_key()
         text = 'my text'
         signature = Asymmetric.sign(text, private_key)
-        try:
-            Asymmetric.verify(signature, text, public_key)
-        except InvalidSignature:
-            self.fail()
+        self.assertTrue(Asymmetric.verify(signature, text, public_key))
 
     def test_sign_verify_different_key(self):
         private_key, _ = Asymmetric.generate_key()
         _, public_key = Asymmetric.generate_key()
         text = 'my text'
         signature = Asymmetric.sign(text, private_key)
-        with self.assertRaises(InvalidSignature):
-            Asymmetric.verify(signature, text, public_key)
+        self.assertFalse(Asymmetric.verify(signature, text, public_key))
 
     def test_encryption(self):
         private_key, public_key = Asymmetric.generate_key()

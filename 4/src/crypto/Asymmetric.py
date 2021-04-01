@@ -1,5 +1,6 @@
 from typing import Tuple
 
+from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
@@ -75,24 +76,29 @@ class Asymmetric:
         return signature.hex()
 
     @staticmethod
-    def verify(signature: str, text: str, public_key: str) -> None:
+    def verify(signature: str, text: str, public_key: str) -> bool:
         """
         Verify the signature of the text
         :param signature: Hex signature
         :param text: Plaintext
         :param public_key: Hex public key
-        :raises InvalidSignature: If the signature does not match
+        :return: Verification
         """
         key = serialization.load_pem_public_key(bytes.fromhex(public_key))
-        key.verify(
-            signature=bytes.fromhex(signature),
-            data=text.encode('utf-8'),
-            padding=padding.PSS(
-                mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
-            ),
-            algorithm=hashes.SHA256()
-        )
+        try:
+            key.verify(
+                signature=bytes.fromhex(signature),
+                data=text.encode('utf-8'),
+                padding=padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                algorithm=hashes.SHA256()
+            )
+        except (ValueError, InvalidSignature):
+            return False
+        else:
+            return True
 
     @staticmethod
     def encrypt(text: str, public_key: str) -> str:
