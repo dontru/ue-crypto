@@ -1,3 +1,4 @@
+import random
 from typing import Dict, List, Optional, Tuple
 
 
@@ -16,7 +17,17 @@ class Cipher:
         self.row_transpositions = [] if row_transpositions is None else row_transpositions
 
     def encrypt(self, plaintext: str) -> str:
-        pass
+        return ''.join([self.substitute(c) for c in plaintext])
+
+    def substitute(self, character: str) -> str:
+        return random.choice(self.substitution[character]) if character in self.substitution else character
 
     def decrypt(self, encrypted: str) -> str:
-        pass
+        return ''.join([self.unsubstitute(c) for c in encrypted])
+
+    def unsubstitute(self, character: str) -> str:
+        for k, v in self.substitution.items():
+            if character in v:
+                return k
+        else:
+            return character
